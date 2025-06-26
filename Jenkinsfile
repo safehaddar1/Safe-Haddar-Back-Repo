@@ -3,7 +3,7 @@ pipeline {
  
     environment {
         SONARQUBE = 'SonarQube'               // Jenkins SonarQube server name
-        DOCKER_IMAGE = 'front:latest'         // Docker image tag to build and push
+        DOCKER_IMAGE = 'back:latest'         // Docker image tag to build and push
         NEXUS_REGISTRY = 'localhost:9004'     // Nexus Docker registry URL
         NEXUS_CREDENTIALS_ID = 'nexus-creds'  // Jenkins credentials ID for Nexus login (username/password)
     }
