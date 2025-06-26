@@ -1,23 +1,50 @@
 pipeline {
-  agent any
-
-  environment {
-    SONARQUBE = 'MySonar'
-  }
-
-  stages {
-    stage('Build Backend') {
-      steps {
-        sh './mvnw clean install'
-      }
+    agent any
+    environment {
+        SONARQUBE = 'SonarQube'               // Jenkins SonarQube server name
+        DOCKER_IMAGE = 'front:latest'         // Docker image tag to build and push
+        NEXUS_REGISTRY = 'localhost:9004'     // Nexus Docker registry URL
+        NEXUS_CREDENTIALS_ID = 'nexus-creds'  // Jenkins credentials ID for Nexus login (username/password)
     }
-
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv("${SONARQUBE}") {
-          sh './mvnw sonar:sonar'
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
+stage('Build & Test') {
+    steps {
+        sh 'chmod +x mvnw'
+        sh './mvnw clean package'
     }
-  }
 }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${env.SONARQUBE}") {
+                    sh './mvnw sonar:sonar -Dsonar.projectKey=backend'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${env.DOCKER_IMAGE} ."
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def imageName = "${env.NEXUS_REGISTRY}/${env.DOCKER_IMAGE}"
+                    // Tag the image with Nexus registry URL
+                    sh "docker tag ${env.DOCKER_IMAGE} ${imageName}"
+                    // Login to Nexus Docker registry using Jenkins credentials
+                    withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                        sh "docker login ${env.NEXUS_REGISTRY} -u ${env.NEXUS_USER} -p ${env.NEXUS_PASS}"
+                        sh "docker push ${imageName}"
+                    }
+                }
+            }
+        }
+    }
+}
+ 
