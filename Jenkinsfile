@@ -1,29 +1,28 @@
 pipeline {
     agent any
-
+ 
     environment {
-        SONARQUBE = 'SonarQube'
-        DOCKER_IMAGE_NAME = 'back'
-        DOCKER_IMAGE_TAG = 'latest'
-        DOCKER_REGISTRY = 'nexus:5000'  // Make sure Jenkins can resolve 'nexus' to the Nexus container IP or hostname
-        FULL_IMAGE = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-        NEXUS_CREDENTIALS_ID = 'nexus-creds'
+        SONARQUBE = 'SonarQube'               // Jenkins SonarQube server name
+        DOCKER_IMAGE = 'back:latest'         // Docker image tag to build and push
+        NEXUS_REGISTRY = 'localhost:5000'     // Nexus Docker registry URL
+        NEXUS_CREDENTIALS_ID = 'nexus-creds'  // Jenkins credentials ID for Nexus login (username/password)
     }
-
+ 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        stage('Build & Test') {
-            steps {
-                sh 'chmod +x mvnw'
-                sh './mvnw clean package'
-            }
-        }
-
+ 
+stage('Build & Test') {
+    steps {
+        sh 'chmod +x mvnw'
+        sh './mvnw clean package'
+    }
+}
+ 
+ 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${env.SONARQUBE}") {
@@ -31,37 +30,30 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
-                sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${FULL_IMAGE}"
+                sh "docker build -t back:latest ."
             }
         }
-
+ 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: NEXUS_CREDENTIALS_ID,
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    sh """
-                        echo "\${NEXUS_PASS}" | docker login ${DOCKER_REGISTRY} -u \${NEXUS_USER} --password-stdin
-                        docker push ${FULL_IMAGE} || (sleep 5 && docker push ${FULL_IMAGE}) || (sleep 10 && docker push ${FULL_IMAGE})
-                        docker logout ${DOCKER_REGISTRY}
-                    """
+                script {
+                    def imageName = "${env.NEXUS_REGISTRY}/${env.DOCKER_IMAGE}"
+ 
+                    // Tag the image with Nexus registry URL
+                    sh "docker tag ${env.DOCKER_IMAGE} ${imageName}"
+ 
+                    // Secure login and push
+            withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                sh """
+                    echo \$NEXUS_PASS | docker login ${env.NEXUS_REGISTRY} -u \$NEXUS_USER --password-stdin
+                    docker push ${imageName}
+                """
+            }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            sh """
-                docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true
-                docker rmi ${FULL_IMAGE} || true
-            """
         }
     }
 }
