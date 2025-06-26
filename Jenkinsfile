@@ -2,29 +2,22 @@ pipeline {
   agent any
 
   environment {
-    SONARQUBE = 'MySonar' // Name from Jenkins config
+    SONARQUBE = 'MySonar'
   }
 
   stages {
-    stage('Clone Back Repo') {
-      steps {
-        git 'https://github.com/safehaddar1/Safe-Haddar-Back-Repo'
-      }
-    }
-
     stage('Build Backend') {
       steps {
-        sh './mvnw clean install' // ou `mvn clean install` selon ton projet
+        sh './mvnw clean install'
       }
     }
 
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv("${SONARQUBE}") {
-          sh './mvnw sonar:sonar' // ou `mvn sonar:sonar`
+          sh './mvnw sonar:sonar'
         }
       }
     }
   }
 }
-
