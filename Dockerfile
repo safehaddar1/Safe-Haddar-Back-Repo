@@ -10,8 +10,3 @@ RUN apt-get update && \
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="$JAVA_HOME/bin:$PATH"
-
-# Add docker group with host GID (replace 998 with your host docker GID if needed)
-RUN groupadd -g 137 docker && usermod -aG docker jenkins
-
-USER jenkins
