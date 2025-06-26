@@ -45,11 +45,13 @@ stage('Build & Test') {
                     // Tag the image with Nexus registry URL
                     sh "docker tag ${env.DOCKER_IMAGE} ${imageName}"
  
-                    // Login to Nexus Docker registry using Jenkins credentials
-                    withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                        sh "docker login ${env.NEXUS_REGISTRY} -u ${env.NEXUS_USER} -p ${env.NEXUS_PASS}"
-                        sh "docker push ${imageName}"
-                    }
+                    // Secure login and push
+            withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                sh """
+                    echo \$NEXUS_PASS | docker login ${env.NEXUS_REGISTRY} -u \$NEXUS_USER --password-stdin
+                    docker push ${imageName}
+                """
+            }
                 }
             }
         }
