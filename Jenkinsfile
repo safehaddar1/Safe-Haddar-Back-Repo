@@ -33,7 +33,7 @@ stage('Build & Test') {
  
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${env.DOCKER_IMAGE} ."
+                sh "docker build -t back:latest ."
             }
         }
  
