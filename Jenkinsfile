@@ -27,6 +27,4 @@ pipeline {
     }
   }
 }
-withSonarQubeEnv('MySonar') {
-  sh 'mvn sonar:sonar'
-}
+
