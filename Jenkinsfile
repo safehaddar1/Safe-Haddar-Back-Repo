@@ -30,6 +30,13 @@ stage('Build & Test') {
                 }
             }
         }
+
+       stage('Deploy JAR to Nexus') {
+            steps {
+                sh './mvnw deploy'
+            }
+        }
+
  
         stage('Build Docker Image') {
             steps {
