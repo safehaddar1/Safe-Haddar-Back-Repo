@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
         SONARQUBE = 'SonarQube'               // Jenkins SonarQube server name
         DOCKER_IMAGE = 'back:latest'         // Docker image tag to build and push
         NEXUS_REGISTRY = 'localhost:5000'    // Nexus Docker registry URL
