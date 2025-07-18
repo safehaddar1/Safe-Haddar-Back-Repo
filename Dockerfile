@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:lts
+FROM eclipse-temurin:17-jdk
 
 USER root
 
