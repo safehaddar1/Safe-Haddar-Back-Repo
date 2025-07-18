@@ -17,28 +17,26 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                configFileProvider([configFile(fileId: 'nexus-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh 'chmod +x mvnw'
-                    sh './mvnw clean package -s $MAVEN_SETTINGS'
-                }
+                sh 'chmod +x mvnw'
+                sh './mvnw clean package
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${env.SONARQUBE}") {
-                    configFileProvider([configFile(fileId: 'nexus-settings', variable: 'MAVEN_SETTINGS')]) {
-                        sh './mvnw sonar:sonar -Dsonar.projectKey=backend -s $MAVEN_SETTINGS'
-                    }
+                    
+                      sh './mvnw sonar:sonar -Dsonar.projectKey=backend -s $MAVEN_SETTINGS'
+                    
                 }
             }
         }
 
         stage('Deploy JAR to Nexus') {
             steps {
-                configFileProvider([configFile(fileId: 'nexus-settings', variable: 'MAVEN_SETTINGS')]) {
+                
                     sh './mvnw deploy -s $MAVEN_SETTINGS'
-                }
+                
             }
         }
 
