@@ -7,7 +7,9 @@ pipeline {
         NEXUS_REGISTRY = 'localhost:5000'    // Nexus Docker registry URL
         NEXUS_CREDENTIALS_ID = 'nexus-creds' // Jenkins credentials ID for Nexus login (username/password)
     }
-
+    tools {
+    jdk 'JDK17'
+    }
     stages {
         stage('Checkout') {
             steps {
