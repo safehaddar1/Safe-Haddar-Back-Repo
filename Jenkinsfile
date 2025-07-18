@@ -37,9 +37,13 @@ pipeline {
 
         stage('Deploy JAR to Nexus') {
             steps {
-                
-                    sh './mvnw deploy'
-                
+                withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+                        ./mvnw deploy \
+                        -Dnexus.username=$NEXUS_USER \
+                        -Dnexus.password=$NEXUS_PASS
+                    '''
+                }
             }
         }
 
