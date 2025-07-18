@@ -18,7 +18,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw clean package
+                sh './mvnw clean package'
             }
         }
 
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 withSonarQubeEnv("${env.SONARQUBE}") {
                     
-                      sh './mvnw sonar:sonar -Dsonar.projectKey=backend -s $MAVEN_SETTINGS'
+                      sh './mvnw sonar:sonar -Dsonar.projectKey=backend'
                     
                 }
             }
@@ -35,7 +35,7 @@ pipeline {
         stage('Deploy JAR to Nexus') {
             steps {
                 
-                    sh './mvnw deploy -s $MAVEN_SETTINGS'
+                    sh './mvnw deploy'
                 
             }
         }
