@@ -1,12 +1,9 @@
-FROM jenkins/jenkins:lts
+FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-# Install docker client, git, openjdk 17
 RUN apt-get update && \
-    apt-get install -y docker.io git openjdk-17-jdk && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y docker.io git && \
+    apt-get clean
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH="$JAVA_HOME/bin:$PATH"
+USER jenkins
