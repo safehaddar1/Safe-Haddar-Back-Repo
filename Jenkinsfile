@@ -35,6 +35,17 @@ pipeline {
         //     }
         // }
 
+        stage('Check JDK Version') {
+            steps {
+                sh '''
+                    echo "===== Checking Java Version on Agent ====="
+                    java -version
+                    echo "========================================="
+                '''
+            }
+        }
+
+
         stage('Deploy JAR to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
