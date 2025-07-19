@@ -1,9 +1,5 @@
-FROM jenkins/jenkins:lts-jdk17
-
-USER root
-
-RUN apt-get update && \
-    apt-get install -y docker.io git && \
-    apt-get clean
-
-USER jenkins
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY target/*.jar app.jar
+EXPOSE 8089
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=8089"]
