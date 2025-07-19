@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'jdk17'
-    }
-
     environment {
         SONARQUBE = 'SonarQube'               // Jenkins SonarQube server name
         DOCKER_IMAGE = 'back:latest'         // Docker image tag to build and push
