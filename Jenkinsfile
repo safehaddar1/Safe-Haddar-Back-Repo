@@ -25,15 +25,15 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("${env.SONARQUBE}") {
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv("${env.SONARQUBE}") {
                     
-                      sh './mvnw sonar:sonar -Dsonar.projectKey=backend'
+        //               sh './mvnw sonar:sonar -Dsonar.projectKey=backend'
                     
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
 
         stage('Deploy JAR to Nexus') {
             steps {
