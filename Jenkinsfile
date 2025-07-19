@@ -73,11 +73,14 @@ pipeline {
             """
 
             echo "Deploying JAR to Nexus..."
-            sh """
-                mvnw deploy -DskipTests --settings settings.xml -X \
+            sh '''
+                chmod +x mvnw
+                ./mvnw --version
+
+                ./mvnw deploy -DskipTests --settings settings.xml -X \
                   -DaltDeploymentRepository=nexus-snapshots::default::${NEXUS_URL}/repository/maven-snapshots/ \
                   -DaltReleaseDeploymentRepository=nexus-releases::default::${NEXUS_URL}/repository/maven-releases/
-            """
+            '''
         }
     }
 }
