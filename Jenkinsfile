@@ -6,6 +6,8 @@ pipeline {
         DOCKER_IMAGE = 'back:latest'         // Docker image tag to build and push
         NEXUS_REGISTRY = 'localhost:5000'    // Nexus Docker registry URL
         NEXUS_CREDENTIALS_ID = 'nexus-creds' // Jenkins credentials ID for Nexus login (username/password)
+        NEXUS_URL = 'http://nexusmain:8081'
+
     }
 
     stages {
