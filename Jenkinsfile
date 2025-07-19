@@ -35,28 +35,51 @@ pipeline {
         //     }
         // }
 
-        stage('Check JDK Version') {
-            steps {
-                sh '''
-                    echo "===== Checking Java Version on Agent ====="
-                    java -version
-                    echo "========================================="
-                '''
-            }
-        }
-
-
         stage('Deploy JAR to Nexus') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh '''
-                        ./mvnw deploy \
-                        -Dnexus.username=$NEXUS_USER \
-                        -Dnexus.password=$NEXUS_PASS
-                    '''
-                }
-            }
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: NEXUS_CREDENTIALS_ID,
+            usernameVariable: 'NEXUS_USER',
+            passwordVariable: 'NEXUS_PASS'
+        )]) {
+            echo "Authenticating with Nexus..."
+            sh '''
+                curl -u ${NEXUS_USER}:${NEXUS_PASS} -I ${NEXUS_URL}/service/rest/v1/status
+                if [ $? -ne 0 ]; then
+                    echo "Authentication failed!"
+                    exit 1
+                fi
+                echo "Authentication successful"
+            '''
+
+            echo "Writing temporary Maven settings.xml..."
+            writeFile file: 'settings.xml', text: """
+<settings>
+  <servers>
+    <server>
+      <id>nexus-snapshots</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+    <server>
+      <id>nexus-releases</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+  </servers>
+</settings>
+            """
+
+            echo "Deploying JAR to Nexus..."
+            sh """
+                mvn deploy -DskipTests --settings settings.xml -X \
+                  -DaltDeploymentRepository=nexus-snapshots::default::${NEXUS_URL}/repository/maven-snapshots/ \
+                  -DaltReleaseDeploymentRepository=nexus-releases::default::${NEXUS_URL}/repository/maven-releases/
+            """
         }
+    }
+}
+
 
         stage('Build Docker Image') {
             steps {
